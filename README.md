@@ -14,8 +14,7 @@ The system consists of six main components working together:
 2. **React Frontend** - A modern, responsive standalone chat application with Vite build system
 3. **Open edX Integration** - Seamless integration with Open edX learning platforms via Tutor plugin
 4. **Flowise Integration** - LLM orchestration system for advanced AI workflows
-5. **Ollama Integration** - Local LLM support for offline capabilities
-6. **Caddy Reverse Proxy** - Production-ready reverse proxy with WebSocket support
+5. **Caddy Reverse Proxy** - Production-ready reverse proxy with WebSocket support
 
 ## 📁 Project Structure
 
