@@ -10,6 +10,7 @@ export const Login = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (authService.isAuthenticated()) {
@@ -80,12 +81,36 @@ export const Login = () => {
 
         <FormControl isInvalid={!!error}>
           <FormLabel>Password</FormLabel>
-          <Input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter your password"
-          />
+          <Box position="relative">
+            <Input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              pr="4.5rem"
+            />
+            <Button
+              type="button"
+              className="password-toggle"
+              onClick={() => setShowPassword((prev) => !prev)}
+              position="absolute"
+              right="0.5rem"
+              top="50%"
+              transform="translateY(-50%)"
+              size="sm"
+              variant="ghost"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  setShowPassword((prev) => !prev);
+                }
+              }}
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </Button>
+          </Box>
           {error && <FormErrorMessage>{error}</FormErrorMessage>}
         </FormControl>
 

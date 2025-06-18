@@ -4,7 +4,7 @@ A comprehensive multi-application system that provides LLM-powered chat function
 
 ## 🚀 What is IBAL?
 
-IBAL (Intelligent Bot Assistant Learning) is a full-stack chat application that combines the power of Django for backend services, React for modern frontend experiences, and WebSocket technology for real-time communication. It's designed to be easily integrated into existing learning management systems like Open edX while also providing a standalone chat experience with support for multiple LLM providers including Flowise and Ollama.
+IBAL (Intelligent Bot Assistant Learning) is a full-stack chat application that combines the power of Django for backend services, React for modern frontend experiences, and WebSocket technology for real-time communication. It's designed to be easily integrated into existing learning management systems like Open edX while also providing a standalone chat experience with support for multiple LLM providers including Flowise.
 
 ## 🏗️ System Architecture
 
@@ -14,8 +14,7 @@ The system consists of six main components working together:
 2. **React Frontend** - A modern, responsive standalone chat application with Vite build system
 3. **Open edX Integration** - Seamless integration with Open edX learning platforms via Tutor plugin
 4. **Flowise Integration** - LLM orchestration system for advanced AI workflows
-5. **Ollama Integration** - Local LLM support for offline capabilities
-6. **Caddy Reverse Proxy** - Production-ready reverse proxy with WebSocket support
+5. **Caddy Reverse Proxy** - Production-ready reverse proxy with WebSocket support
 
 ## 📁 Project Structure
 
@@ -179,7 +178,7 @@ Production-ready reverse proxy configuration:
 ### 🔌 Integration Capabilities
 
 - **Open edX Integration**: Native Tutor plugin and XBlock support
-- **Multiple LLM Providers**: Flowise and Ollama integration
+- **Multiple LLM Providers**: Flowise
 - **Extensible Architecture**: Easy to add new LLM providers
 - **API-First Design**: RESTful APIs for external integrations
 - **Webhook Support**: Ready for webhook integrations
@@ -492,7 +491,6 @@ The project includes comprehensive testing:
 | React Frontend | 🚧 Under Development | Modern UI with TypeScript, Vite, and testing |
 | Open edX Plugin | 🚧 Under Development | Tutor plugin and XBlock integration |
 | Flowise Integration | ✅ Complete | Async client with retry mechanisms |
-| Ollama Integration | ✅ Complete | Local LLM support implemented |
 | Caddy Proxy | ✅ Complete | Production-ready reverse proxy |
 | Docker Setup | ✅ Complete | Full containerization with all services |
 | Testing Suite | ✅ Complete | Comprehensive test coverage |
@@ -502,7 +500,6 @@ The project includes comprehensive testing:
 ### Version 2.1 - Advanced Integration Features
 
 - **Flowise Integration**: Complete async client with retry mechanisms and health checks
-- **Ollama Support**: Local LLM integration with Docker support
 - **Enhanced Security**: Rate limiting, iframe embedding, and improved CORS
 - **Production Ready**: Caddy reverse proxy and comprehensive Docker setup
 
@@ -607,7 +604,6 @@ We welcome contributions! Here's how you can help:
 - [Open edX Developer Documentation](https://docs.openedx.org/)
 - [Playwright Testing Guide](https://playwright.dev/docs/intro)
 - [Flowise Documentation](https://docs.flowiseai.com/)
-- [Ollama Documentation](https://ollama.ai/docs)
 - [Caddy Documentation](https://caddyserver.com/docs/)
 
 ## 📄 License
@@ -621,7 +617,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Open edX community for platform integration
 - Playwright for excellent testing capabilities
 - Flowise team for LLM orchestration platform
-- Ollama team for local LLM support
 - Caddy team for the reverse proxy solution
 
 ---
