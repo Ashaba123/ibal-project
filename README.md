@@ -117,16 +117,6 @@ Advanced LLM orchestration with Flowise:
 - **Configuration**: Environment-based configuration for different flows
 - **Docker Integration**: Seamless integration with Docker Compose setup
 
-### 5. Ollama Integration
-
-Local LLM support for offline capabilities:
-
-- **Local Model Management**: Support for running LLMs locally via Ollama
-- **API Integration**: Seamless integration with the backend
-- **Offline Capabilities**: Chat functionality without internet dependency
-- **Model Switching**: Support for different local models
-- **Docker Support**: Containerized Ollama service
-
 ### 6. Caddy Reverse Proxy
 
 Production-ready reverse proxy configuration:
@@ -246,12 +236,6 @@ Production-ready reverse proxy configuration:
    - Session management for conversation continuity
    - Health monitoring and fallback handling
 
-2. **Ollama Integration**
-   - Local LLM communication via Ollama API
-   - Model management and switching
-   - Offline capability support
-   - Performance optimization for local inference
-
 ## 🔒 Environment Configuration & Security Best Practices
 
 ### Environment Variables
@@ -274,15 +258,17 @@ All sensitive credentials and configuration values (such as OAuth client IDs, se
 ```env
 SECRET_KEY=your-secret-key
 DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1
+ALLOWED_HOSTS=localhost,127.0.0.1,example.com
 OPENEDX_CLIENT_ID=your-client-id
 OPENEDX_CLIENT_SECRET=your-client-secret
 OPENEDX_AUTH_URL=http://local.openedx.io/oauth2/authorize/
 OPENEDX_TOKEN_URL=http://local.openedx.io/oauth2/access_token/
 OPENEDX_REDIRECT_URI=http://localhost:8000/oauth/callback/
 WS_URL=ws://localhost:8000/ws/chat/
-FLOWISE_URL=http://localhost:3000
+FLOWISE_URL=http://your-flowise-url
 FLOWISE_FLOW_ID=your-flow-id
+FLOWISE_TIMEOUT=30
+FLOWISE_MAX_RETRIES=3
 ```
 
 **Never commit your `.env` files to version control!**
@@ -323,13 +309,13 @@ Before you begin, ensure you have the following installed:
    ```bash
    # Create backend environment file
    cat > backend/.env << EOF
-   SECRET_KEY=your-super-secret-key-change-this-in-production
+   SECRET_KEY=your-secret-key
    DEBUG=True
-   ALLOWED_HOSTS=localhost,127.0.0.1,mylocal.test
+   ALLOWED_HOSTS=localhost,127.0.0.1,example.com
    DJANGO_SETTINGS_MODULE=llm_websocket_api.settings
-   BASE_URL=http://mylocal.test:8000
-   FLOWISE_URL=http://flowise:3000
-   FLOWISE_FLOW_ID=cec1768e-22b4-44e1-947d-41842dd44d8f
+   BASE_URL=http://your-backend-url
+   FLOWISE_URL=http://your-flowise-url
+   FLOWISE_FLOW_ID=your-flow-id
    FLOWISE_TIMEOUT=30
    FLOWISE_MAX_RETRIES=3
    EOF
@@ -502,9 +488,9 @@ The project includes comprehensive testing:
 
 | Component | Status | Description |
 |-----------|--------|-------------|
-| Backend API | ✅ Complete | Django + WebSocket with dual authentication |
-| React Frontend | ✅ Complete | Modern UI with TypeScript, Vite, and testing |
-| Open edX Plugin | ✅ Complete | Tutor plugin and XBlock integration |
+| Backend API | 🚧 Under Development | Django + WebSocket with dual authentication |
+| React Frontend | 🚧 Under Development | Modern UI with TypeScript, Vite, and testing |
+| Open edX Plugin | 🚧 Under Development | Tutor plugin and XBlock integration |
 | Flowise Integration | ✅ Complete | Async client with retry mechanisms |
 | Ollama Integration | ✅ Complete | Local LLM support implemented |
 | Caddy Proxy | ✅ Complete | Production-ready reverse proxy |
