@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Start Chat</title>
+    <style>
+      .description {
+        margin: 20px;
+        line-height: 1.6;
+      }
+      .error-message {
+        color: #dc3545;
+        background-color: #f8d7da;
+        padding: 10px;
+        margin: 10px;
+        border-radius: 4px;
+        display: none;
+      }
+      .start-chat-btn {
+        background-color: #0084ff;
+        color: #ffffff !important;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 24px;
+        cursor: pointer;
+        font-size: 16px;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 20px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .start-chat-btn:hover {
+        background-color: #0066cc;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        color: #ffffff !important;
+      }
+      .start-chat-btn:active {
+        background-color: #0052a3;
+        transform: translateY(1px);
+        color: #ffffff !important;
+      }
+      .success-message {
+        display: none;
+        background-color: #d4edda;
+        color: #155724;
+        padding: 15px;
+        margin: 20px;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+      .success-message.show {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="description">
+      <h2>LLM Chat Assistant</h2>
+      <p>
+        Welcome to our AI-powered chat assistant. This tool uses advanced
+        language models to help you with your questions and tasks.
+      </p>
+      <p>
+        Click the button below to start a conversation with the AI assistant.
+      </p>
+    </div>
+    <button class="start-chat-btn" id="startChatBtn">Start Chat</button>
+    <div id="errorContainer" class="error-message"></div>
+    <div id="successMessage" class="success-message">
+      Chat session has been opened in a new tab. You can now interact with the
+      AI assistant.
+    </div>
+
+    <script>
+      document
+        .querySelector("#startChatBtn")
+        .addEventListener("click", function (e) {
+          e.preventDefault();
+          console.log("Start Chat button clicked");
+
+          // Get the XBlock's handler URL for OAuth
+          const xblockElement = document.querySelector(".ibal-chat-block");
+          if (!xblockElement) {
+            showError("XBlock not found on the page");
+            return;
+          }
+
+          // Get the runtime from the XBlock
+          const runtime = window.XBlockRuntime;
+          if (!runtime) {
+            showError("XBlock runtime not found");
+            return;
+          }
+
+          // Call the XBlock's get_auth_url handler
+          runtime
+            .handlerUrl(xblockElement, "get_auth_url")
+            .then((response) => {
+              if (response.auth_url) {
+                // Open the OAuth URL in a new tab
+                window.open(response.auth_url, "_blank");
+
+                // Hide the button and description
+                this.style.display = "none";
+                document.querySelector(".description").style.display = "none";
+
+                // Show success message
+                document.getElementById("successMessage").classList.add("show");
+              } else {
+                showError("Failed to get authentication URL");
+              }
+            })
+            .catch((error) => {
+              console.error("Auth error:", error);
+              showError("Failed to start authentication");
+            });
+        });
+
+      function showError(message) {
+        const errorContainer = document.getElementById("errorContainer");
+        errorContainer.textContent = message;
+        errorContainer.style.display = "block";
+        setTimeout(() => {
+          errorContainer.style.display = "none";
+        }, 5000);
+      }
+
+      // Handle OAuth callback
+      window.addEventListener("message", function (event) {
+        // Verify the origin of the message
+        if (event.origin !== window.location.origin) {
+          return;
+        }
+
+        // Check if the message contains an auth code
+        if (
+          event.data &&
+          event.data.type === "oauth_callback" &&
+          event.data.code
+        ) {
+          const xblockElement = document.querySelector(".ibal_chat_xblock");
+          if (xblockElement) {
+            // Call the XBlock's exchange_token handler
+            window.XBlockRuntime.handlerUrl(xblockElement, "exchange_token")
+              .then((response) => {
+                if (response.status === "success") {
+                  // Token exchange successful, the XBlock will handle the rest
+                  console.log("Token exchange successful");
+                } else {
+                  showError("Failed to exchange token");
+                }
+              })
+              .catch((error) => {
+                console.error("Token exchange error:", error);
+                showError("Token exchange failed");
+              });
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

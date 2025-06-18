@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>LLM Chat Login</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #f5f5f5;
+      }
+      .login-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+      .login-button {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 20px;
+      }
+      .login-button:hover {
+        background-color: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <h1>Welcome to LLM Chat</h1>
+      <p>Please log in with your Open edX account to continue.</p>
+      <a
+        href="http://local.openedx.io/oauth2/authorize/?client_id={{ client_id }}&response_type=code&redirect_uri={{ redirect_uri }}&scope=read+write"
+        class="login-button"
+        onclick="handleLoginClick(event)"
+      >
+        Login with Open edX
+      </a>
+    </div>
+
+    <script>
+      console.log("Login page loaded");
+      console.log("Client ID:", "{{ client_id }}");
+      console.log("Redirect URI:", "{{ redirect_uri }}");
+
+      function handleLoginClick(event) {
+        console.log("Login button clicked");
+        const loginUrl = event.target.href;
+        console.log("Redirecting to:", loginUrl);
+      }
+
+      // Log any errors that occur during page load
+      window.onerror = function (msg, url, lineNo, columnNo, error) {
+        console.error("Page error:", {
+          message: msg,
+          url: url,
+          line: lineNo,
+          column: columnNo,
+          error: error,
+        });
+        return false;
+      };
+    </script>
+  </body>
+</html>

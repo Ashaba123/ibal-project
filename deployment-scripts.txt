@@ -1,0 +1,13 @@
+# deploy.sh
+#!/bin/bash
+ENVIRONMENT=$1  # development, staging, or production
+
+if [ "$ENVIRONMENT" = "production" ]; then
+    export ENV_FILE=.env.production
+elif [ "$ENVIRONMENT" = "staging" ]; then
+    export ENV_FILE=.env.staging
+else
+    export ENV_FILE=.env.development
+fi
+
+docker-compose --env-file $ENV_FILE up -d

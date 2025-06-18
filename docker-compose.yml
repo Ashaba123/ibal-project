@@ -1,0 +1,61 @@
+services:
+  caddy:
+    image: caddy:2
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+    networks:
+      - default
+
+  flowise:
+    image: flowiseai/flowise:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./flowise_data:/home/node/.flowise
+    environment:
+      - PORT=3000
+      - EXECUTION_MODE=main
+    networks:
+      - default
+
+  backend:
+    build: ./backend
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             daphne -b 0.0.0.0 -p 8000 llm_websocket_api.asgi:application"
+    volumes:
+      - ./backend:/app/backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env.${ENVIRONMENT:-development}
+    environment:
+      - DEBUG=True
+      - ENV_FILE=.env.${ENVIRONMENT:-development}
+      - ALLOWED_HOSTS=localhost,127.0.0.1,mylocal.test
+      - DJANGO_SETTINGS_MODULE=llm_websocket_api.settings
+      - BASE_URL=http://mylocal.test:8000
+      - FLOWISE_URL=http://flowise:3000
+      - FLOWISE_FLOW_ID=cec1768e-22b4-44e1-947d-41842dd44d8f
+      - FLOWISE_TIMEOUT=30
+      - FLOWISE_MAX_RETRIES=3
+    depends_on:
+      - redis
+      - flowise
+    networks:
+      - default
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge

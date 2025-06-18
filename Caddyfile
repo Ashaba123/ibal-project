@@ -1,0 +1,65 @@
+{
+	# Global options
+	admin off
+	auto_https off # Since we're using local development
+}
+
+# Open edX domain
+:8080 {
+	reverse_proxy localhost:18000
+}
+
+# Our backend domain
+:8000 {
+	# Global logging configuration
+	log {
+		output stdout
+		format json
+		level INFO
+	}
+
+	# Handle CORS for both OpenEdX and React frontend
+	header {
+		Access-Control-Allow-Origin "http://localhost:5173", "http://mylocal.test:8000"
+		Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+		Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+		Access-Control-Allow-Credentials "true"
+		Access-Control-Max-Age "3600"
+		Access-Control-Expose-Headers "Content-Type, X-CSRFToken"
+	}
+
+	# Handle OPTIONS requests
+	@options {
+		method OPTIONS
+	}
+	handle @options {
+		respond 204
+	}
+
+	# WebSocket support
+	@websocket {
+		header Connection *Upgrade*
+		header Upgrade websocket
+	}
+	handle @websocket {
+		reverse_proxy localhost:8001
+	}
+
+	# Main reverse proxy
+	reverse_proxy localhost:8001
+}
+
+# Flowise configuration
+:3000 {
+	reverse_proxy flowise:3000
+}
+
+# Ollama configuration
+:11434 {
+	reverse_proxy ollama:11434
+}
+
+# React frontend development server
+:5173 {
+	reverse_proxy localhost:5173
+}
