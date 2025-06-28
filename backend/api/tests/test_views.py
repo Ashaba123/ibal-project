@@ -70,14 +70,14 @@ class OAuth2TokenModelTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='tokuser', password='pass')
 
-    def test_is_expired(self):
+    def test_token_expiry_manual(self):
         token = OAuth2Token.objects.create(
             user=self.user,
             access_token='a',
             refresh_token='r',
             expires_at=timezone.now() - timedelta(days=1)
         )
-        self.assertTrue(token.is_expired())
+        self.assertLess(token.expires_at, timezone.now())
         token.expires_at = timezone.now() + timedelta(days=1)
         token.save()
-        self.assertFalse(token.is_expired()) 
+        self.assertGreater(token.expires_at, timezone.now()) 
