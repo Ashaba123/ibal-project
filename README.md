@@ -24,10 +24,8 @@ ibal-project/
 ├── backend/                    # Django WebSocket API Backend
 │   ├── api/                   # Main API application
 │   │   ├── templates/        # HTML templates for different frontends
-│   │   │   ├── react/       # React frontend templates
-│   │   │   └── openedx/     # Open edX integration templates
 │   │   ├── oauth2/          # OAuth2 authentication handling
-│   │   ├── tests/           # Backend test suite
+│   │   ├── tests/           # Backend test suite (JWT, OAuth2, WebSocket, Views)
 │   │   ├── consumers.py     # WebSocket consumers for real-time chat
 │   │   ├── flowise_client.py # Flowise API integration
 │   │   ├── middleware.py    # Custom middleware for iframe embedding
@@ -48,10 +46,10 @@ ibal-project/
 │   │   │   ├── Error/    # Error handling components
 │   │   │   └── Welcome/  # Welcome page components
 │   │   ├── context/      # React context providers
-│   │   ├── pages/        # Page-level components
+│   │   ├── pages/        # Page-level components (Login, Register, Chat, Welcome)
 │   │   ├── services/     # API and WebSocket services
 │   │   └── types/        # TypeScript type definitions
-│   ├── tests/             # Playwright end-to-end tests
+│   ├── tests/             # Playwright end-to-end tests (auth.spec.ts, chat.spec.ts)
 │   ├── vercel.json        # Vercel deployment configuration
 │   └── package.json       # Node.js dependencies
 ├── tutor-openedx/         # Open edX Tutor plugin
@@ -68,8 +66,16 @@ ibal-project/
 │   │   └── README.md     # XBlock documentation
 │   └── xblock-sdk/       # XBlock development toolkit
 ├── flowise_data/         # Flowise configuration and data
+├── .github/              # GitHub workflows and configuration
+├── .cursor/              # Cursor IDE configuration
+├── venv/                 # Python virtual environment
 ├── Caddyfile             # Caddy reverse proxy configuration
-└── docker-compose.yml    # Docker orchestration with all services
+├── docker-compose.yml    # Docker orchestration with all services
+├── deployment-scripts.txt # Deployment automation scripts
+├── .gitignore            # Git ignore patterns
+├── package.json          # Root package.json for workspace
+├── package-lock.json     # Root package-lock.json
+└── db.sqlite3            # SQLite database (development)
 ```
 
 ## 🔧 Core Components
@@ -87,6 +93,7 @@ The backend is built with Django and Django Channels, providing a robust foundat
 - **Security Features**: CORS, CSP headers, secure token management, and iframe embedding support
 - **Structured Logging**: Comprehensive logging for debugging and monitoring
 - **Redis Integration**: Channel layer for WebSocket communication
+- **PostgreSQL Database**: Production-ready database with proper migrations
 
 ### 2. React Frontend
 
@@ -101,6 +108,7 @@ A modern, responsive chat interface built with React, TypeScript, and Vite:
 - **Playwright Tests**: Comprehensive end-to-end testing with UI mode support
 - **Vercel Deployment**: Optimized for Vercel deployment with analytics integration
 - **Modern UI**: Chat bubble design with proper message alignment and timestamps
+- **User Registration**: Complete user registration and login system
 
 ### 3. IBAL XBlock (Open edX Integration)
 
@@ -239,6 +247,7 @@ Production-ready reverse proxy configuration:
 
 2. **Authentication Process**
    - Secure JWT-based authentication flow
+   - User registration and login system
    - Token generation and secure storage
    - Automatic chat session initialization
    - Token refresh handling for long sessions
@@ -404,7 +413,7 @@ You can use different `.env` files for different environments. For example, set 
 Before you begin, ensure you have the following installed:
 
 - [Docker](https://docs.docker.com/get-docker/)
-- [Docker Compose]<https://docs.docker.com/compose/install/>
+- [Docker Compose](https://docs.docker.com/compose/install/)
 - [Node.js](https://nodejs.org/) (v16 or higher)
 - [Git](https://git-scm.com/)
 - [Python](https://www.python.org/) (v3.8 or higher) for development
@@ -589,8 +598,10 @@ docker-compose exec backend pytest --cov=api --cov-report=html
 Run specific test files:
 
 ```bash
- docker-compose exec backend pytest api/tests/test_jwt_auth.py
- docker-compose exec backend pytest api/tests/test_oauth2_auth.py
+docker-compose exec backend pytest api/tests/test_jwt_auth.py
+docker-compose exec backend pytest api/tests/test_oauth2_auth.py
+docker-compose exec backend pytest api/tests/test_websocket.py
+docker-compose exec backend pytest api/tests/test_views.py
 ```
 
 ### Frontend Testing
@@ -639,16 +650,24 @@ The project includes comprehensive testing:
 
 | Component | Status | Description |
 |-----------|--------|-------------|
-| Backend API | 🚧 Under Development | Django + WebSocket with dual authentication |
-| React Frontend | 🚧 Under Development | Modern UI with TypeScript, Vite, and testing |
-| IBAL XBlock | ✅ Complete | Modern chat interface with debugging features |
-| Open edX Plugin | 🚧 Under Development | Tutor plugin and XBlock integration |
-| Flowise Integration | ✅ Complete | Async client with retry mechanisms |
-| Caddy Proxy | ✅ Complete | Production-ready reverse proxy |
-| Docker Setup | ✅ Complete | Full containerization with all services |
-| Testing Suite | ✅ Complete | Comprehensive test coverage |
+| Backend API | ✅ Complete | Django + WebSocket with dual authentication, PostgreSQL, Redis |
+| React Frontend | ✅ Complete | Modern UI with TypeScript, Vite, Playwright tests, user registration |
+| IBAL XBlock | ✅ Complete | Modern chat interface with debugging features and OAuth2 |
+| Open edX Plugin | ✅ Complete | Tutor plugin with OAuth2 integration and configuration |
+| Flowise Integration | ✅ Complete | Async client with retry mechanisms and health checks |
+| Caddy Proxy | ✅ Complete | Production-ready reverse proxy with WebSocket support |
+| Docker Setup | ✅ Complete | Full containerization with PostgreSQL, Redis, and all services |
+| Testing Suite | ✅ Complete | Comprehensive test coverage (Backend: 4 test files, Frontend: 2 test files) |
 
 ## 🔄 Recent Updates
+
+### Version 2.3 - Production Ready
+
+- **PostgreSQL Database**: Upgraded from SQLite to PostgreSQL for production scalability
+- **Enhanced Docker Setup**: Complete containerization with all services
+- **Comprehensive Testing**: Full test suite with 4 backend test files and 2 frontend test files
+- **User Registration**: Complete user registration and login system in React frontend
+- **Production Configuration**: Environment-based configuration for different deployments
 
 ### Version 2.2 - IBAL XBlock Enhancement
 
@@ -701,7 +720,6 @@ We welcome contributions! Here's how you can help:
 
    ```bash
    git checkout -b feature/your-feature-name
-
    ```
 
 3. **Make your changes** following our coding standards
@@ -757,9 +775,10 @@ We welcome contributions! Here's how you can help:
 
 - Run migrations: `docker-compose exec backend python manage.py migrate`
 - Check database connection in Django settings
-- Verify SQLite file permissions
+- Verify PostgreSQL connection and credentials
 - Check Redis connection for WebSocket channels
 **Flowise Integration Issues**
+
 - Verify Flowise service is running: `docker-compose logs flowise`
 - Check Flowise flow ID configuration
 - Verify network connectivity between services
