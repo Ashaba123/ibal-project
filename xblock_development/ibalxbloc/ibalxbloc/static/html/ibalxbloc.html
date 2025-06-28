@@ -1,7 +1,63 @@
 <div class="ibalxbloc-container">
   <h2>Welcome to the Ibal Chat</h2>
-  <button id="start-chat-btn" class="ibalxbloc-btn" aria-label="Start Chat">
-    Start Chat
-  </button>
+
+  <!-- Start Chat Section -->
+  <div id="start-chat-section">
+    <button id="start-chat-btn" class="ibalxbloc-btn" aria-label="Start Chat">
+      Start Chat
+    </button>
+  </div>
+
+  <!-- Chat Interface Section (initially hidden) -->
+  <div id="chat-interface" class="chat-interface" style="display: none">
+    <!-- User Info and Controls -->
+    <div class="chat-header">
+      <div class="user-info">
+        <span class="username-label">Logged in as:</span>
+        <span id="logged-username" class="username">Loading...</span>
+      </div>
+      <div class="connection-status">
+        <span id="connection-status" class="status-indicator"
+          >Connecting...</span
+        >
+      </div>
+      <button
+        id="close-chat-btn"
+        class="close-chat-btn"
+        aria-label="Close Chat"
+      >
+        Close Chat
+      </button>
+    </div>
+
+    <!-- Messages Display Area -->
+    <div id="messages-container" class="messages-container">
+      <div id="messages-list" class="messages-list">
+        <!-- Messages will be dynamically added here -->
+      </div>
+    </div>
+
+    <!-- Message Input Area -->
+    <div class="message-input-area">
+      <div class="input-container">
+        <input
+          type="text"
+          id="message-input"
+          class="message-input"
+          placeholder="Type your message here..."
+          aria-label="Message input"
+        />
+        <button
+          id="send-message-btn"
+          class="send-message-btn"
+          aria-label="Send Message"
+        >
+          Send
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Display -->
   <div id="ibalxbloc-status"></div>
 </div>
