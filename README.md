@@ -118,7 +118,8 @@ A complete chat XBlock for Open edX with modern interface and debugging capabili
 - **Error Handling**: Graceful error handling with detailed console logging
 - **Accessibility**: Proper ARIA labels and keyboard navigation support
 
-#### XBlock Features:
+#### XBlock Features
+
 - **Bubble Messages**: Chat-style message bubbles with rounded corners
 - **Connection Monitoring**: Real-time WebSocket connection status
 - **Debug Console**: Filter logs by "[IbalXBlock]" for easy debugging
@@ -324,34 +325,25 @@ Production-ready reverse proxy configuration:
 
 The IBAL XBlock includes comprehensive console logging for easy debugging:
 
-#### Log Categories:
+#### Log Categories
+
 - **WebSocket Connection**: Connection setup, opening, closing, and errors
 - **Message Handling**: Incoming messages, parsing, and errors
 - **User Interactions**: Button clicks and user actions
 - **Authentication**: OAuth2 flow and token management
 - **Error Handling**: Detailed error messages with context
 
-#### How to Debug XBlock:
+#### How to Debug XBlock
+
 1. **Open Browser DevTools** (F12)
 2. **Go to Console Tab**
 3. **Filter by "[IbalXBlock]"** to see only XBlock logs
 4. **Monitor real-time activity** as you use the chat
 
-#### Example XBlock Console Output:
-```
-[IbalXBlock] Start Chat button activated
-[IbalXBlock] Opening OAuth2 authorize popup: http://local.openedx.io/oauth2/authorize/?client_id=...
-[IbalXBlock] Access token found in localStorage: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
-[IbalXBlock] Using access_token for WebSocket: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
-[IbalXBlock] Opening WebSocket connection to: ws://localhost:8000/ws/chat/?token=...&auth_type=oauth2
-[IbalXBlock] WebSocket connection opened
-[IbalXBlock] Received message: {"type":"user_info","username":"john_doe"}
-[IbalXBlock] Received message: {"type":"message","content":"Hello!","sender":"john_doe","timestamp":"..."}
-```
-
 ### Backend Logging
 
 The Django backend includes structured logging for:
+
 - WebSocket connection events
 - Authentication flows
 - Message processing

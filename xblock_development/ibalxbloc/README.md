@@ -5,23 +5,27 @@ A modern chat XBlock for Open edX that provides real-time messaging capabilities
 ## 🚀 Features
 
 ### 💬 Modern Chat Interface
+
 - **Bubble Messages**: Messages are displayed in chat bubbles with different styles for sent/received messages
 - **Real-time Messaging**: Send and receive messages instantly via WebSocket connection
 - **Responsive Design**: Works on desktop and mobile devices
 - **Message Metadata**: Shows sender name and timestamp for each message
 
 ### 🔐 Authentication & Security
+
 - **OAuth2 Integration**: Secure authentication with Open edX OAuth2
 - **Token Management**: Automatic token storage and retrieval in localStorage
 - **User Information**: Displays logged-in username
 - **XSS Protection**: HTML escaping for user messages
 
 ### 📊 Connection & Status Monitoring
+
 - **Visual Indicators**: Real-time connection status with color-coded indicators
 - **Status Messages**: Clear feedback about connection state (Connecting, Connected, Disconnected, Error)
 - **WebSocket Health**: Monitor connection health and automatic reconnection
 
 ### 🎯 User Experience
+
 - **Start Chat Button**: Large, green button to initiate chat session
 - **Close Chat Button**: Easy way to return to start screen
 - **Message Input**: Clean input field with send button
@@ -29,6 +33,7 @@ A modern chat XBlock for Open edX that provides real-time messaging capabilities
 - **Auto-scroll**: Messages automatically scroll to bottom
 
 ### 🛠️ Debugging & Development
+
 - **Comprehensive Logging**: Extensive console logging for debugging
 - **Error Tracking**: Detailed error messages and stack traces
 - **Connection Monitoring**: Real-time WebSocket connection status
@@ -39,6 +44,7 @@ A modern chat XBlock for Open edX that provides real-time messaging capabilities
 The XBlock includes extensive console logging for easy debugging and development:
 
 ### Log Categories
+
 - **WebSocket Connection**: Connection setup, opening, closing, and errors
 - **Message Handling**: Incoming messages, parsing, and errors
 - **User Interactions**: Button clicks and user actions
@@ -46,40 +52,33 @@ The XBlock includes extensive console logging for easy debugging and development
 - **Error Handling**: Detailed error messages with context
 
 ### How to Debug
+
 1. **Open Browser DevTools** (F12)
 2. **Go to Console Tab**
 3. **Filter by "[IbalXBlock]"** to see only XBlock logs
 4. **Monitor real-time activity** as you use the chat
 
-### Example Console Output
-```
-[IbalXBlock] Start Chat button activated
-[IbalXBlock] Opening OAuth2 authorize popup: http://local.openedx.io/oauth2/authorize/?client_id=...
-[IbalXBlock] Access token found in localStorage: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
-[IbalXBlock] Using access_token for WebSocket: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
-[IbalXBlock] Opening WebSocket connection to: ws://localhost:8000/ws/chat/?token=...&auth_type=oauth2
-[IbalXBlock] WebSocket connection opened
-[IbalXBlock] Received message: {"type":"user_info","username":"john_doe"}
-[IbalXBlock] Received message: {"type":"message","content":"Hello!","sender":"john_doe","timestamp":"..."}
-```
-
 ## 🔄 How It Works
 
 ### 1. Initial State
+
 - Shows "Start Chat" button with green styling
 - Displays status message: "Click Start Chat to begin"
 
 ### 2. Authentication Flow
+
 - User clicks "Start Chat" → Opens OAuth2 popup
 - After successful authentication → Token stored in localStorage
 - Popup closes and notifies main window
 
 ### 3. WebSocket Connection
+
 - Establishes connection to backend WebSocket server
 - Sends OAuth2 token for authentication
 - Updates connection status in real-time
 
 ### 4. Chat Interface
+
 - Shows complete chat interface with:
   - User info header (logged-in username)
   - Connection status indicator
@@ -88,12 +87,14 @@ The XBlock includes extensive console logging for easy debugging and development
   - Close chat button
 
 ### 5. Messaging
+
 - Send messages via input field or Enter key
 - Messages appear as blue bubbles (sent) or white bubbles (received)
 - Real-time message exchange via WebSocket
 - Auto-scroll to latest messages
 
 ### 6. Close Chat
+
 - Click "Close Chat" button
 - Returns to initial "Start Chat" state
 - Clears messages and resets connection
@@ -101,6 +102,7 @@ The XBlock includes extensive console logging for easy debugging and development
 ## 🎨 Design Features
 
 ### Visual Design
+
 - **Modern UI**: Clean, professional chat interface
 - **Bubble Messages**: Chat-style message bubbles with rounded corners
 - **Color Coding**: Different colors for sent/received messages and status indicators
@@ -108,6 +110,7 @@ The XBlock includes extensive console logging for easy debugging and development
 - **Responsive Layout**: Adapts to different screen sizes
 
 ### Status Indicators
+
 - **Connecting**: Yellow background with "Connecting..." text
 - **Connected**: Green background with "Connected" text
 - **Disconnected**: Red background with "Disconnected" text
@@ -116,22 +119,26 @@ The XBlock includes extensive console logging for easy debugging and development
 ## 🔧 Technical Implementation
 
 ### WebSocket Communication
+
 - **Endpoint**: `ws://localhost:8000/ws/chat/`
 - **Authentication**: OAuth2 token passed as URL parameter
 - **Message Format**: JSON with type, content, sender, and timestamp
 - **Error Handling**: Graceful handling of connection issues
 
 ### Message Types
+
 - `message`: Regular chat messages with content and sender
 - `user_info`: User information updates (username)
 - `system`: System messages for notifications
 
 ### Data Flow
+
 1. **User Input** → Message validation → WebSocket send
 2. **WebSocket Receive** → Message parsing → UI update
 3. **Connection Events** → Status updates → Visual feedback
 
 ### Security Features
+
 - **OAuth2 Authentication**: Secure token-based authentication
 - **XSS Prevention**: HTML escaping for user messages
 - **Token Storage**: Secure localStorage token management
@@ -140,17 +147,20 @@ The XBlock includes extensive console logging for easy debugging and development
 ## 📋 Installation & Setup
 
 ### Prerequisites
+
 - Open edX environment with XBlock support
 - WebSocket server running at specified endpoint
 - OAuth2 provider configured
 
 ### Installation Steps
+
 1. **Install XBlock** in your Open edX environment
 2. **Configure OAuth2** settings in the XBlock
 3. **Set WebSocket URL** to your backend server
 4. **Add to Course** content where needed
 
 ### Configuration Required
+
 - OAuth2 client ID and secret
 - Authentication endpoints (authorize, token)
 - WebSocket server URL
@@ -167,12 +177,14 @@ The XBlock includes extensive console logging for easy debugging and development
 ## 🐛 Troubleshooting
 
 ### Common Issues
+
 1. **Connection Failed**: Check WebSocket server is running
 2. **Authentication Error**: Verify OAuth2 configuration
 3. **Messages Not Sending**: Check WebSocket connection status
 4. **UI Not Loading**: Ensure JavaScript is enabled
 
 ### Debug Steps
+
 1. Open browser console and filter by "[IbalXBlock]"
 2. Check for error messages in console
 3. Verify WebSocket connection status
@@ -182,12 +194,14 @@ The XBlock includes extensive console logging for easy debugging and development
 ## 📝 Development Notes
 
 ### Code Structure
+
 - **Modular Design**: Separate functions for different features
 - **Event-Driven**: jQuery event handlers for user interactions
 - **State Management**: Local variables for connection and user state
 - **Error Handling**: Try-catch blocks with detailed logging
 
 ### Performance Considerations
+
 - **Message Scrolling**: Efficient auto-scroll implementation
 - **DOM Updates**: Minimal DOM manipulation for performance
 - **Memory Management**: Proper cleanup on chat close
