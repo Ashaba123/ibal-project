@@ -1,0 +1,18 @@
+.ibalxbloc-container {
+  text-align: center;
+  padding: 20px;
+}
+.ibalxbloc-btn {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 16px;
+  transition: background 0.2s;
+}
+.ibalxbloc-btn:hover {
+  background: #1d4ed8;
+} 

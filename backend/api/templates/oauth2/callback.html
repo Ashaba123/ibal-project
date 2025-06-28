@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>OAuth2 Callback</title>
+  </head>
+  <body>
+    <script>
+      // These variables are rendered by Django
+      const accessToken = "{{ access_token|escapejs }}";
+      const refreshToken = "{{ refresh_token|escapejs }}";
+      const expiresIn = "{{ expires_in|escapejs }}";
+      const tokenType = "{{ token_type|escapejs }}";
+      if (accessToken) {
+        window.localStorage.removeItem("access_token");
+        window.localStorage.setItem("access_token", accessToken);
+        if (window.opener) {
+          window.opener.postMessage(
+            {
+              type: "oauth2_token",
+              access_token: accessToken,
+              refresh_token: refreshToken,
+              expires_in: expiresIn,
+              token_type: tokenType,
+            },
+            "*"
+          );
+        }
+        setTimeout(() => window.close(), 500);
+      } else {
+        document.write("No access token received.");
+      }
+    </script>
+    <noscript
+      >OAuth2 authentication complete. You may close this window.</noscript
+    >
+  </body>
+</html>
