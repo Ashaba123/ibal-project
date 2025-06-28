@@ -13,8 +13,9 @@ The system consists of six main components working together:
 1. **Django WebSocket API Backend** - The core server handling authentication, real-time messaging, and API endpoints
 2. **React Frontend** - A modern, responsive standalone chat application with Vite build system
 3. **Open edX Integration** - Seamless integration with Open edX learning platforms via Tutor plugin
-4. **Flowise Integration** - LLM orchestration system for advanced AI workflows
-5. **Caddy Reverse Proxy** - Production-ready reverse proxy with WebSocket support
+4. **IBAL XBlock** - Custom XBlock with complete chat interface and debugging features
+5. **Flowise Integration** - LLM orchestration system for advanced AI workflows
+6. **Caddy Reverse Proxy** - Production-ready reverse proxy with WebSocket support
 
 ## 📁 Project Structure
 
@@ -56,7 +57,16 @@ ibal-project/
 ├── tutor-openedx/         # Open edX Tutor plugin
 │   └── tutor_llm_plugin/  # Plugin for Open edX integration
 ├── xblock_development/    # XBlock development environment
-│   └── ibal_chat_xblock/ # Custom XBlock for Open edX
+│   ├── ibalxbloc/        # IBAL XBlock with complete chat interface
+│   │   ├── ibalxbloc/    # XBlock source code
+│   │   │   ├── static/   # Static assets (CSS, JS, HTML)
+│   │   │   │   ├── css/  # Chat interface styling
+│   │   │   │   ├── js/   # JavaScript with console logging
+│   │   │   │   └── html/ # HTML templates
+│   │   │   └── ibalxbloc.py # Main XBlock implementation
+│   │   ├── setup.py      # XBlock installation configuration
+│   │   └── README.md     # XBlock documentation
+│   └── xblock-sdk/       # XBlock development toolkit
 ├── flowise_data/         # Flowise configuration and data
 ├── Caddyfile             # Caddy reverse proxy configuration
 └── docker-compose.yml    # Docker orchestration with all services
@@ -92,7 +102,31 @@ A modern, responsive chat interface built with React, TypeScript, and Vite:
 - **Vercel Deployment**: Optimized for Vercel deployment with analytics integration
 - **Modern UI**: Chat bubble design with proper message alignment and timestamps
 
-### 3. Open edX Integration
+### 3. IBAL XBlock (Open edX Integration)
+
+A complete chat XBlock for Open edX with modern interface and debugging capabilities:
+
+- **Modern Chat Interface**: Bubble-style messages with sent/received styling
+- **Real-time Messaging**: WebSocket-based communication with OAuth2 authentication
+- **User Information**: Displays logged-in username and connection status
+- **Visual Status Indicators**: Color-coded connection status (Connecting, Connected, Disconnected, Error)
+- **Enhanced UI**: Large green "Start Chat" button and red "Close Chat" button
+- **Comprehensive Logging**: Extensive console logging for debugging with "[IbalXBlock]" prefix
+- **Message Management**: Auto-scroll, timestamps, and message metadata
+- **Responsive Design**: Works on desktop and mobile devices
+- **Security Features**: XSS protection, HTML escaping, and secure token management
+- **Error Handling**: Graceful error handling with detailed console logging
+- **Accessibility**: Proper ARIA labels and keyboard navigation support
+
+#### XBlock Features:
+- **Bubble Messages**: Chat-style message bubbles with rounded corners
+- **Connection Monitoring**: Real-time WebSocket connection status
+- **Debug Console**: Filter logs by "[IbalXBlock]" for easy debugging
+- **Message Flow**: Send/receive messages with timestamps and sender info
+- **Session Management**: Persistent chat sessions with token storage
+- **Modern Styling**: Professional chat interface with smooth animations
+
+### 4. Open edX Integration
 
 Comprehensive integration with Open edX learning platforms:
 
@@ -104,7 +138,7 @@ Comprehensive integration with Open edX learning platforms:
 - **Separate Templates**: Dedicated templates for Open edX integration
 - **Configuration Management**: Environment-based configuration for different deployments
 
-### 4. Flowise Integration
+### 5. Flowise Integration
 
 Advanced LLM orchestration with Flowise:
 
@@ -157,6 +191,15 @@ Production-ready reverse proxy configuration:
 - **Intuitive Navigation**: Easy-to-use interface with clear call-to-actions
 - **Accessibility**: WCAG compliant design with proper ARIA labels
 
+### 🛠️ Debugging & Development
+
+- **Comprehensive Console Logging**: Extensive logging across all components
+- **XBlock Debugging**: Filter logs by "[IbalXBlock]" for easy debugging
+- **Error Tracking**: Detailed error messages and stack traces
+- **Connection Monitoring**: Real-time WebSocket connection status
+- **Message Flow Tracking**: Monitor message sending and receiving
+- **Development Tools**: Built-in debugging features for development
+
 ### 🧪 Testing & Quality
 
 - **Comprehensive Testing**: Playwright end-to-end tests with UI mode
@@ -207,6 +250,46 @@ Production-ready reverse proxy configuration:
    - Beautiful message bubble interface with timestamps
    - Loading states and error feedback
 
+### IBAL XBlock User Journey
+
+1. **Initial State**
+   - Shows large green "Start Chat" button
+   - Displays status message: "Click Start Chat to begin"
+   - Clean, professional interface
+
+2. **Authentication Flow**
+   - User clicks "Start Chat" → Opens OAuth2 popup
+   - After successful authentication → Token stored in localStorage
+   - Popup closes and notifies main window
+   - Console logs track entire authentication process
+
+3. **WebSocket Connection**
+   - Establishes connection to backend WebSocket server
+   - Sends OAuth2 token for authentication
+   - Updates connection status in real-time
+   - Comprehensive console logging for debugging
+
+4. **Chat Interface**
+   - Shows complete chat interface with:
+     - User info header (logged-in username)
+     - Connection status indicator with color coding
+     - Message display area with bubble styling
+     - Message input field with send button
+     - Red "Close Chat" button
+
+5. **Messaging Experience**
+   - Send messages via input field or Enter key
+   - Messages appear as blue bubbles (sent) or white bubbles (received)
+   - Real-time message exchange via WebSocket
+   - Auto-scroll to latest messages
+   - Message metadata with timestamps
+
+6. **Close Chat**
+   - Click "Close Chat" button
+   - Returns to initial "Start Chat" state
+   - Clears messages and resets connection
+   - Console logs track closure process
+
 ### Open edX Integration Flow
 
 1. **Platform Integration**
@@ -234,6 +317,46 @@ Production-ready reverse proxy configuration:
    - Retry mechanisms for reliability
    - Session management for conversation continuity
    - Health monitoring and fallback handling
+
+## 🔍 Debugging & Console Logging
+
+### XBlock Console Logging
+
+The IBAL XBlock includes comprehensive console logging for easy debugging:
+
+#### Log Categories:
+- **WebSocket Connection**: Connection setup, opening, closing, and errors
+- **Message Handling**: Incoming messages, parsing, and errors
+- **User Interactions**: Button clicks and user actions
+- **Authentication**: OAuth2 flow and token management
+- **Error Handling**: Detailed error messages with context
+
+#### How to Debug XBlock:
+1. **Open Browser DevTools** (F12)
+2. **Go to Console Tab**
+3. **Filter by "[IbalXBlock]"** to see only XBlock logs
+4. **Monitor real-time activity** as you use the chat
+
+#### Example XBlock Console Output:
+```
+[IbalXBlock] Start Chat button activated
+[IbalXBlock] Opening OAuth2 authorize popup: http://local.openedx.io/oauth2/authorize/?client_id=...
+[IbalXBlock] Access token found in localStorage: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+[IbalXBlock] Using access_token for WebSocket: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+[IbalXBlock] Opening WebSocket connection to: ws://localhost:8000/ws/chat/?token=...&auth_type=oauth2
+[IbalXBlock] WebSocket connection opened
+[IbalXBlock] Received message: {"type":"user_info","username":"john_doe"}
+[IbalXBlock] Received message: {"type":"message","content":"Hello!","sender":"john_doe","timestamp":"..."}
+```
+
+### Backend Logging
+
+The Django backend includes structured logging for:
+- WebSocket connection events
+- Authentication flows
+- Message processing
+- Error handling
+- Performance monitoring
 
 ## 🔒 Environment Configuration & Security Best Practices
 
@@ -398,6 +521,31 @@ Before you begin, ensure you have the following installed:
    npm run test:ui  # For interactive test UI
    ```
 
+### IBAL XBlock Development
+
+1. **Navigate to XBlock directory**:
+
+   ```bash
+   cd xblock_development/ibalxbloc
+   ```
+
+2. **Install XBlock in development mode**:
+
+   ```bash
+   pip install -e .
+   ```
+
+3. **Test in XBlock workbench**:
+
+   ```bash
+   cd ../xblock-sdk
+   python manage.py runserver
+   ```
+
+4. **Access workbench**: <http://localhost:8000>
+
+5. **Debug with console logs**: Open browser DevTools and filter by "[IbalXBlock]"
+
 ### Open edX Integration Setup
 
 1. **Install Tutor plugin**:
@@ -474,12 +622,24 @@ Run tests in debug mode:
 npm run test -- --debug
 ```
 
+### XBlock Testing
+
+Test the IBAL XBlock in the workbench:
+
+```bash
+cd xblock_development/xblock-sdk
+python manage.py runserver
+```
+
+Access the workbench and test the XBlock with console logging enabled.
+
 ### Test Coverage
 
 The project includes comprehensive testing:
 
 - **Backend**: Unit tests for authentication, API endpoints, WebSocket consumers, and Flowise integration
 - **Frontend**: End-to-end tests covering user flows, authentication, and chat functionality
+- **XBlock**: Manual testing with comprehensive console logging
 - **Integration**: Tests for Open edX integration and OAuth2 flows
 - **Performance**: Load testing and WebSocket connection testing
 
@@ -489,6 +649,7 @@ The project includes comprehensive testing:
 |-----------|--------|-------------|
 | Backend API | 🚧 Under Development | Django + WebSocket with dual authentication |
 | React Frontend | 🚧 Under Development | Modern UI with TypeScript, Vite, and testing |
+| IBAL XBlock | ✅ Complete | Modern chat interface with debugging features |
 | Open edX Plugin | 🚧 Under Development | Tutor plugin and XBlock integration |
 | Flowise Integration | ✅ Complete | Async client with retry mechanisms |
 | Caddy Proxy | ✅ Complete | Production-ready reverse proxy |
@@ -496,6 +657,18 @@ The project includes comprehensive testing:
 | Testing Suite | ✅ Complete | Comprehensive test coverage |
 
 ## 🔄 Recent Updates
+
+### Version 2.2 - IBAL XBlock Enhancement
+
+- **Complete Chat Interface**: Modern bubble-style messages with sent/received styling
+- **Enhanced UI**: Large green "Start Chat" button and red "Close Chat" button
+- **Connection Status**: Real-time WebSocket connection monitoring with color-coded indicators
+- **Comprehensive Logging**: Extensive console logging with "[IbalXBlock]" prefix for easy debugging
+- **User Information**: Display logged-in username and connection status
+- **Message Management**: Auto-scroll, timestamps, and message metadata
+- **Security Features**: XSS protection, HTML escaping, and secure token management
+- **Responsive Design**: Works on desktop and mobile devices
+- **Accessibility**: Proper ARIA labels and keyboard navigation support
 
 ### Version 2.1 - Advanced Integration Features
 
@@ -548,6 +721,9 @@ We welcome contributions! Here's how you can help:
    
    # Frontend tests
    cd react-frontend && npm test
+   
+   # XBlock testing
+   cd xblock_development/xblock-sdk && python manage.py runserver
    ```
 
 5. **Commit your changes** with clear commit messages
@@ -559,6 +735,7 @@ We welcome contributions! Here's how you can help:
 - Write tests for new features
 - Use TypeScript for frontend development
 - Maintain consistent code formatting with Black, isort, and ESLint
+- Add console logging for XBlock features with "[IbalXBlock]" prefix
 - Update documentation for new features
 - Ensure proper error handling and logging
 
@@ -578,6 +755,12 @@ We welcome contributions! Here's how you can help:
 - Check OAuth2 settings for Open edX integration
 - Verify CORS settings in backend configuration
 - Check token expiration and refresh mechanisms
+**XBlock Issues**
+
+- Check browser console and filter by "[IbalXBlock]"
+- Verify OAuth2 configuration in XBlock
+- Ensure WebSocket server is accessible from XBlock
+- Check iframe embedding permissions
 **Database Issues**
 
 - Run migrations: `docker-compose exec backend python manage.py migrate`
@@ -596,12 +779,14 @@ We welcome contributions! Here's how you can help:
 - Review the logs: `docker-compose logs backend`
 - Check service health: `docker-compose ps`
 - Ensure all environment variables are properly set
+- Use XBlock console logging for debugging: Filter by "[IbalXBlock]"
 
 ## 📚 Additional Resources
 
 - [Django Channels Documentation](https://channels.readthedocs.io/)
 - [React WebSocket Guide](https://react.dev/learn/start-a-new-react-project)
 - [Open edX Developer Documentation](https://docs.openedx.org/)
+- [XBlock Development Guide](https://docs.openedx.org/projects/xblock/en/latest/index.html)
 - [Playwright Testing Guide](https://playwright.dev/docs/intro)
 - [Flowise Documentation](https://docs.flowiseai.com/)
 - [Caddy Documentation](https://caddyserver.com/docs/)
@@ -615,6 +800,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Django Channels for WebSocket support
 - React team for the amazing frontend framework
 - Open edX community for platform integration
+- XBlock development team for the framework
 - Playwright for excellent testing capabilities
 - Flowise team for LLM orchestration platform
 - Caddy team for the reverse proxy solution
