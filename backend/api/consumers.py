@@ -6,7 +6,6 @@ from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
-from .oauth2.models import OAuth2Token
 from .models import ChatSession, Message
 from datetime import datetime, timezone
 import jwt
@@ -34,6 +33,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.user = None
         self.is_connected = False
         self.last_token_refresh = None
+        self.connection_accepted = False
 
     async def connect(self):
         """
@@ -45,74 +45,127 @@ class ChatConsumer(AsyncWebsocketConsumer):
         4. Creates/retrieves a chat session
         5. Sets up the WebSocket connection
         """
+        logger.info("[WebSocket] connect() called. Starting connection process.")
+        
+        # First, accept the connection to establish the WebSocket
+        try:
+            await self.accept()
+            self.connection_accepted = True
+            logger.info("[WebSocket] Connection accepted successfully.")
+        except Exception as e:
+            logger.error(f"[WebSocket] Failed to accept connection: {str(e)}", exc_info=True)
+            # If we can't accept, just close without sending error message
+            try:
+                await self.close(code=4001, reason=f"Failed to accept connection: {str(e)}")
+            except Exception as close_error:
+                logger.error(f"[WebSocket] Failed to close connection: {str(close_error)}")
+            return
+
+        # Now handle the rest of the connection logic
         try:
             # Rate limiting check
             client_ip = self.scope.get('client', ('0.0.0.0', 0))[0]
+            logger.info(f"[WebSocket] Client IP: {client_ip}")
             if not await self.check_rate_limit(client_ip):
-                await self.close(code=4002, reason="Rate limit exceeded. Please try again later.")
+                logger.warning("[WebSocket] Rate limit exceeded for IP: %s", client_ip)
+                await self.close_with_error(4002, "Rate limit exceeded. Please try again later.")
                 return
 
             # Get the token and auth_type from the query string
             query_string = self.scope['query_string'].decode()
+            logger.info(f"[WebSocket] Query string: {query_string}")
             token = None
             auth_type = None
-            
             for param in query_string.split('&'):
                 if param.startswith('token='):
                     token = param.split('=')[1]
                 elif param.startswith('auth_type='):
                     auth_type = param.split('=')[1]
-            
+            logger.info(f"[WebSocket] Token: {token}")
+            logger.info(f"[WebSocket] Auth type: {auth_type}")
+
             if not token or not auth_type:
+                logger.warning("[WebSocket] No token or auth_type provided.")
                 await self.close_with_error(4001, "No token or auth_type provided")
                 return
-            
-            # Verify token based on auth type
+
+            user = None
             if auth_type == 'jwt':
+                logger.info("[WebSocket] JWT authentication attempted.")
                 user = await self.verify_jwt_token(token)
+                if not user:
+                    logger.warning("[WebSocket] Invalid JWT token provided.")
+                    await self.close_with_error(4001, "Invalid JWT token provided")
+                    return
             elif auth_type == 'oauth2':
+                logger.info("[WebSocket] OAuth2 authentication attempted.")
                 user = await self.verify_oauth2_token(token)
+                if not user:
+                    logger.warning("[WebSocket] Invalid OAuth2 token provided.")
+                    await self.close_with_error(4001, "Invalid OAuth2 token provided")
+                    return
             else:
+                logger.warning(f"[WebSocket] Invalid auth_type: {auth_type}")
                 await self.close_with_error(4001, f"Invalid auth_type: {auth_type}")
                 return
-            
-            if not user:
-                await self.close_with_error(4001, "Invalid token provided")
-                return
-            
-            # Store the user and set last token refresh time
+
+            # If authentication succeeded, set user and continue
             self.user = user
             self.last_token_refresh = django_timezone.now()
-            logger.info(f"User {user.username} connected to WebSocket")
-            
-            # Accept the connection
-            await self.accept()
+            logger.info(f"[WebSocket] User {user.username} authenticated and connected to WebSocket.")
             self.is_connected = True
-            
+
             # Add the user to their personal channel group
             await self.channel_layer.group_add(
                 f"user_{self.user.id}",
                 self.channel_name
             )
+            logger.info(f"[WebSocket] Added user {self.user.username} to channel group user_{self.user.id}.")
 
             # Create or get chat session
             self.chat_session = await self.get_or_create_chat_session()
-            logger.info(f"Chat session {self.chat_session.id} created/retrieved for user {user.username}")
-            
+            logger.info(f"[WebSocket] Chat session {self.chat_session.id} created/retrieved for user {user.username}")
+
         except Exception as e:
-            logger.error(f"Error in connect: {str(e)}", exc_info=True)
-            await self.close_with_error(4001, f"Connection error: {str(e)}")
+            logger.error(f"[WebSocket] Error in connect: {str(e)}", exc_info=True)
+            # Since connection is already accepted, we can safely send error message
+            try:
+                # Send error message directly without using close_with_error
+                error_data = {
+                    'type': 'error',
+                    'code': 4001,
+                    'message': f"Connection error: {str(e)}",
+                    'timestamp': datetime.now(timezone.utc).isoformat()
+                }
+                await self.send(text_data=json.dumps(error_data))
+            except Exception as send_error:
+                logger.error(f"[WebSocket] Failed to send error message: {str(send_error)}")
+            finally:
+                # Always close the connection
+                try:
+                    await self.close(code=4001, reason=f"Connection error: {str(e)}")
+                except Exception as close_error:
+                    logger.error(f"[WebSocket] Failed to close connection: {str(close_error)}")
 
     async def close_with_error(self, code, reason):
         """Helper method to close connection with error message."""
-        error_data = {
-            'type': 'error',
-            'code': code,
-            'message': reason,
-            'timestamp': datetime.now(timezone.utc).isoformat()
-        }
-        await self.send(text_data=json.dumps(error_data))
-        await self.close(code=code, reason=reason)
+        try:
+            # Only try to send error message if connection was accepted
+            if self.connection_accepted and hasattr(self, 'scope'):
+                error_data = {
+                    'type': 'error',
+                    'code': code,
+                    'message': reason,
+                    'timestamp': datetime.now(timezone.utc).isoformat()
+                }
+                await self.send(text_data=json.dumps(error_data))
+        except Exception as e:
+            logger.warning(f"Could not send error message before closing: {str(e)}")
+        finally:
+            try:
+                await self.close(code=code, reason=reason)
+            except Exception as e:
+                logger.warning(f"Could not close connection properly: {str(e)}")
 
     @database_sync_to_async
     def check_rate_limit(self, client_ip):
@@ -154,8 +207,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def verify_oauth2_token(self, token):
         """Verify OAuth2 token and get user."""
         try:
+            logger.info(f"OAuth2 verification: Attempting to decode token: {token[:20]}...")
             # Decode token
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+            
+            logger.info(f"OAuth2 verification: Token decoded successfully, payload: {payload}")
             
             # Verify token type
             if payload.get('type') != 'oauth2_access':
@@ -180,22 +236,25 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def check_token_refresh(self):
         """Check if token needs to be refreshed."""
-        if not self.last_token_refresh:
+        if not self.last_token_refresh or not self.connection_accepted:
             return
             
         # Check if token is about to expire (within 5 minutes)
         if (django_timezone.now() - self.last_token_refresh).total_seconds() > 300:
-            await self.send(text_data=json.dumps({
-                'type': 'token_refresh_required',
-                'message': 'Your session is about to expire. Please refresh your token.',
-                'timestamp': datetime.now(timezone.utc).isoformat()
-            }))
+            try:
+                await self.send(text_data=json.dumps({
+                    'type': 'token_refresh_required',
+                    'message': 'Your session is about to expire. Please refresh your token.',
+                    'timestamp': datetime.now(timezone.utc).isoformat()
+                }))
+            except Exception as e:
+                logger.warning(f"Could not send token refresh message: {str(e)}")
 
     async def receive(self, text_data):
         """
         Handle incoming WebSocket messages.
         """
-        if not self.is_connected or not self.user:
+        if not self.is_connected or not self.user or not self.connection_accepted:
             await self.close_with_error(4001, "Not connected or no user")
             return
             
@@ -245,8 +304,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def chat_message(self, event):
         """Handle chat messages."""
         try:
-            if not self.is_connected or not self.user:
-                logger.warning("Received chat_message event while not connected or no user")
+            if not self.is_connected or not self.user or not self.connection_accepted:
+                logger.warning("Received chat_message event while not connected, no user, or connection not accepted")
                 return
 
             # Extract message data from event
@@ -265,7 +324,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             
         except Exception as e:
             logger.error(f"Error in chat_message: {str(e)}", exc_info=True)
-            await self.close(code=4001)
+            if self.connection_accepted:
+                await self.close(code=4001)
 
     @database_sync_to_async
     def get_or_create_chat_session(self):
@@ -284,3 +344,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             content=content,
             is_from_user=is_from_user
         )
+
+    async def disconnect(self, close_code):
+        logger.info(f"[WebSocket] Disconnected. Close code: {close_code}")
+        await super().disconnect(close_code)

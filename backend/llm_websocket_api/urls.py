@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from api import views
+from api.oauth2.views import OAuth2CallbackView
 
 # Main application URLs
 # Flow: login -> oauth callback -> token exchange -> chat
@@ -17,4 +18,7 @@ urlpatterns = [
     
     # Health check endpoints
     path('health/', views.health_check, name='health_check'),
+    
+    # OAuth2 callback endpoint
+    path('oauth/callback/', OAuth2CallbackView.as_view(), name='oauth_callback'),
 ]

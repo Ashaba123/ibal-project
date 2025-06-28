@@ -1,0 +1,1 @@
+This directory is reserved for translation files for the ibalxbloc XBlock. 

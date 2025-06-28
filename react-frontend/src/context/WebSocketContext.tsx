@@ -60,7 +60,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
       ws.current = null; // Important: Set to null after closing
     }
 
-    const wsUrl = `${import.meta.env.VITE_WS_URL}/ws/chat/?token=${token}`;
+    const wsUrl = `${import.meta.env.VITE_WS_URL}/ws/chat/?token=${token}&auth_type=jwt`;
     console.log('[WebSocket] Attempting connection:', {
       url: wsUrl,
       user: user.username,

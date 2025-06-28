@@ -3,6 +3,8 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+#this model class is for react frontend to store chat sessions and messages
+
 class ChatSession(models.Model):
     """Model for chat sessions."""
     user = models.ForeignKey(User, on_delete=models.CASCADE)

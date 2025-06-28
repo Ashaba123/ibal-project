@@ -28,7 +28,7 @@ export class WebSocketService {
 
     this.updateState('connecting');
     const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000';
-    const wsUrl = `${WS_URL}/ws/chat/?token=${this.token}`;
+    const wsUrl = `${WS_URL}/ws/chat/?token=${this.token}&auth_type=jwt`;
     console.log('Connecting to WebSocket:', wsUrl);
 
     try {
