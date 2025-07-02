@@ -31,6 +31,10 @@ class IbalXBlock(XBlock):
             f'<div class="ibalxbloc-container" data-client-id="{client_id}" data-client-secret="{client_secret}" data-auth-url="{auth_url}" data-token-url="{token_url}" data-redirect-uri="{redirect_uri}"',
             1
         )
+        # Inject username as a JS variable
+        user = context.get('user') if context else None
+        username = user.username if user else "Unknown User"
+        html_str += f"<script>window.IBAL_USERNAME = '{username}';</script>"
         frag = Fragment(html_str.format(self=self))
         frag.add_css(self.resource_string('static/css/ibalxbloc.css'))
         frag.add_javascript(self.resource_string('static/js/src/ibalxbloc.js'))

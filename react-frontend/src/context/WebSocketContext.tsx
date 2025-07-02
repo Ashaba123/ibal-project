@@ -133,13 +133,15 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
         // Add message ID to processed set
         processedMessageIds.current.add(messageId);
 
-        // Add message to state
-        setMessages(prev => [...prev, {
-          id: messageId,
-          content: message.content,
-          timestamp: message.timestamp || new Date().toISOString(),
-          isUser: false
-        }]);
+        // Add message to state only if it is a chat message with content
+        if (message.type === 'message' && message.content && message.content.trim() !== '') {
+          setMessages(prev => [...prev, {
+            id: messageId,
+            content: message.content,
+            timestamp: message.timestamp || new Date().toISOString(),
+            isUser: false
+          }]);
+        }
 
         // Clean up old message IDs (keep last 100)
         if (processedMessageIds.current.size > 100) {

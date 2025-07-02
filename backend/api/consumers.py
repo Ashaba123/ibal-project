@@ -126,6 +126,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.chat_session = await self.get_or_create_chat_session()
             logger.info(f"[WebSocket] Chat session {self.chat_session.id} created/retrieved for user {user.username}")
 
+            # Send user_info message to client (after all setup)
+            try:
+                await self.send(text_data=json.dumps({
+                    "type": "user_info",
+                    "username": self.user.username
+                }))
+            except Exception as e:
+                logger.error(f"[WebSocket] Failed to send user_info message: {str(e)}")
+
         except Exception as e:
             logger.error(f"[WebSocket] Error in connect: {str(e)}", exc_info=True)
             # Since connection is already accepted, we can safely send error message
@@ -309,19 +318,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 return
 
             # Extract message data from event
+            content = event.get('content', '')
+            if not content or not content.strip():
+                logger.info("Skipping empty chat message event.")
+                return
             message_data = {
                 'type': 'message',
                 'id': str(uuid.uuid4()),
-                'content': event.get('content', ''),
+                'content': content,
                 'isUser': event.get('isUser', False),
                 'timestamp': datetime.now(timezone.utc).isoformat()
             }
-            
             logger.info(f"Processing chat message event: {message_data}")
-            
             # Send message to WebSocket
             await self.send(text_data=json.dumps(message_data))
-            
         except Exception as e:
             logger.error(f"Error in chat_message: {str(e)}", exc_info=True)
             if self.connection_accepted:

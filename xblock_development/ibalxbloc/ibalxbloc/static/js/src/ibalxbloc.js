@@ -15,8 +15,11 @@ function IbalXBlock(runtime, element) {
 
   // Chat state variables
   let websocket = null;
-  let currentUsername = "Unknown User";
+  let currentUsername = window.IBAL_USERNAME || "Unknown User";
   let isConnected = false;
+
+  // Set the username display immediately on load
+  $(element).find("#logged-username").text(currentUsername);
 
   // Helper to update status
   function updateStatus(msg, type = "info") {
@@ -57,6 +60,9 @@ function IbalXBlock(runtime, element) {
 
   // Helper to add message to chat
   function addMessage(message, sender, isOwnMessage = false) {
+    if (!message || typeof message !== "string" || message.trim() === "") {
+      return; // Don't render empty messages
+    }
     const $messagesList = $(element).find("#messages-list");
     const messageClass = isOwnMessage ? "sent" : "received";
     const currentTime = new Date().toLocaleTimeString([], {
@@ -87,6 +93,20 @@ function IbalXBlock(runtime, element) {
     const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  // Helper to check if JWT token is expired
+  function isTokenExpired(token) {
+    if (!token) return true;
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      if (!payload.exp) return true;
+      // exp is in seconds since epoch
+      const now = Math.floor(Date.now() / 1000);
+      return payload.exp < now;
+    } catch (e) {
+      return true; // treat as expired if any error
+    }
   }
 
   // Helper to send message via WebSocket
@@ -150,6 +170,7 @@ function IbalXBlock(runtime, element) {
             const isOwnMessage = data.sender === currentUsername;
             addMessage(data.content, data.sender, isOwnMessage);
           } else if (data.type === "user_info") {
+            console.log("[IbalXBlock] user_info received:", data);
             currentUsername = data.username || "Unknown User";
             $(element).find("#logged-username").text(currentUsername);
           } else if (data.type === "system") {
@@ -320,15 +341,23 @@ function IbalXBlock(runtime, element) {
       }
     });
 
-pe    // Check for existing token
+    // Check for existing token
     const token = window.localStorage.getItem("access_token");
-    if (token) {
+    if (token && !isTokenExpired(token)) {
       console.log("[IbalXBlock] Access token found in localStorage:", token);
       updateStatus("Connecting to chat...", "info");
       connectToChat(token);
     } else {
-      console.log("[IbalXBlock] No access token found in localStorage");
-      updateStatus("Click Start Chat to begin.", "info");
+      if (token) {
+        // Token exists but is expired
+        window.localStorage.removeItem("access_token");
+        updateStatus(
+          "Session expired. Please click Start Chat to login again.",
+          "error"
+        );
+      } else {
+        updateStatus("Click Start Chat to begin.", "info");
+      }
     }
   });
 }

@@ -39,7 +39,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ sessionId }) => {
 
   const handleSend = () => {
     if (!input.trim()) return;
-
     setIsLoading(true);
     wsRef.current?.sendMessage(input);
     setInput('');
@@ -69,7 +68,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ sessionId }) => {
         borderRadius="lg"
         boxShadow="sm"
       >
-        {messages.map((message, index) => (
+        {messages.filter(message => message.content && message.content.trim() !== '').map((message, index) => (
           <Box
             key={index}
             alignSelf={message.is_user_message ? 'flex-end' : 'flex-start'}

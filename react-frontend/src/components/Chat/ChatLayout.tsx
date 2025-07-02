@@ -80,9 +80,11 @@ export const ChatLayout = () => {
           Logout
         </Button>
       </Box>
-      <Box flex="1" p={4}>
-        <ChatWindow sessionId={session.id} />
-      </Box>
+      <Flex flex="1" justifyContent="center" alignItems="center" bg="gray.100">
+        <Box w="100%" maxW="400px" boxShadow="lg" borderRadius="lg" bg="white" p={4}>
+          <ChatWindow sessionId={session.id} />
+        </Box>
+      </Flex>
     </Flex>
   );
 }; 
