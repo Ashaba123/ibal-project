@@ -218,4 +218,17 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 class CustomTokenRefreshView(TokenRefreshView):
     """Custom view for refreshing JWT tokens."""
-    pass 
+    pass
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def current_user(request):
+    """
+    Return the current authenticated user's info.
+    """
+    user = request.user
+    return Response({
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+    }) 
