@@ -248,9 +248,16 @@ ollama-data/models/manifests/registry.ollama.ai/library/tinyllama/latest
 # ===========================================
 # Tutor Open edX
 # ===========================================
+tutor-openedx/*
 tutor-openedx/*.egg-info/
 tutor-openedx/build/
 tutor-openedx/dist/
+
+# ===========================================
+# Xblock Development
+# ===========================================
+xblock_development/
+xblock_development/*
 
 # ===========================================
 # Cursor IDE
