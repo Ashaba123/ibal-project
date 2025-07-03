@@ -15,13 +15,28 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./flowise_data:/home/node/.flowise
-      - flowise_data:/home/node/.flowise
+      - ./flowise_data:/root/.flowise 
     environment:
       - PORT=3000
       - EXECUTION_MODE=main
+    env_file:
+      - .env.${ENVIRONMENT:-development}  
+    depends_on:
+      - ollama  
     networks:
       - default
+      - tutor-iblchat-network
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./ollama-data:/root/.ollama
+    networks:
+      - default
+      - tutor-iblchat-network
+
 
   db:
     image: postgres:14
@@ -50,16 +65,7 @@ services:
     env_file:
       - .env.${ENVIRONMENT:-development}
     environment:
-      - DEBUG=True
       - ENV_FILE=.env.${ENVIRONMENT:-development}
-      - ALLOWED_HOSTS=localhost,127.0.0.1,mylocal.test
-      - DJANGO_SETTINGS_MODULE=llm_websocket_api.settings
-      - BASE_URL=http://mylocal.test:8000
-      - FLOWISE_URL=http://flowise:3000
-      - FLOWISE_FLOW_ID=cec1768e-22b4-44e1-947d-41842dd44d8f
-      - FLOWISE_TIMEOUT=30
-      - FLOWISE_MAX_RETRIES=3
-      - DATABASE_URL=postgres://ibaluser:ibalpassword@db:5432/ibaldb
     depends_on:
       - redis
       - flowise
@@ -87,6 +93,5 @@ networks:
 
 volumes:
   backend_data:
-  flowise_data:
   redis_data:
   postgres_data:

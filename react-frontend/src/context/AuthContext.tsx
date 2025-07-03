@@ -74,6 +74,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setUser(userData);
     } catch (error) {
       console.error('[Auth] Login error:', error);
+      if (
+        (error instanceof Error && error.message === 'User does not exist') ||
+        (typeof error === 'object' && error !== null && 'message' in error && (error as any).message === 'User does not exist')
+      ) {
+        throw new Error('USER_DOES_NOT_EXIST');
+      }
       throw error;
     } finally {
       setIsLoading(false);

@@ -182,7 +182,8 @@ def register(request):
             email=email,
             password=password
         )
-
+        # Create a new chat session for the user
+        chat_session = ChatSession.objects.create(user=user)
         refresh = RefreshToken.for_user(user)
         
         return Response({
@@ -191,6 +192,7 @@ def register(request):
                 'username': user.username,
                 'email': user.email
             },
+            'chat_session_id': chat_session.id,
             'access': str(refresh.access_token),
             'refresh': str(refresh)
         }, status=status.HTTP_201_CREATED)

@@ -3,6 +3,9 @@ import aiohttp
 import asyncio
 from django.conf import settings
 from typing import Dict, Any, Optional
+import logging
+
+logger = logging.getLogger(__name__)
 
 class FlowiseClient:
     """
@@ -11,8 +14,8 @@ class FlowiseClient:
     def __init__(self):
         self.base_url = os.getenv('FLOWISE_URL', 'http://flowise:3000')
         self.flow_id = os.getenv('FLOWISE_FLOW_ID')
-        self.timeout = int(os.getenv('FLOWISE_TIMEOUT', 30))
-        self.max_retries = int(os.getenv('FLOWISE_MAX_RETRIES', 3))
+        self.timeout = int(os.getenv('FLOWISE_TIMEOUT', 60))
+        self.max_retries = int(os.getenv('FLOWISE_MAX_RETRIES', 10))
 
     async def send_message(self, message: str, session_id: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -28,10 +31,13 @@ class FlowiseClient:
         url = f"{self.base_url}/api/v1/prediction/{self.flow_id}"
         
         payload = {
-            "message": message,
+            "question": message,
             "sessionId": session_id
         }
 
+        logger.info(f"FlowiseClient: Sending payload to Flowise: {payload}")
+
+        # Tries up to max_retries times in case of errors.
         for attempt in range(self.max_retries):
             try:
                 async with aiohttp.ClientSession() as session:
@@ -41,7 +47,10 @@ class FlowiseClient:
                         timeout=self.timeout
                     ) as response:
                         if response.status == 200:
+                            # If the response is successful, return the JSON response.
+                            logger.info(f"Flowise API response: {await response.json()}")
                             return await response.json()
+                        
                         else:
                             error_text = await response.text()
                             raise Exception(f"Flowise API error: {error_text}")

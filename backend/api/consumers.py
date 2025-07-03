@@ -12,6 +12,7 @@ import jwt
 from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone as django_timezone
+from .flowise_client import FlowiseClient
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -45,35 +46,27 @@ class ChatConsumer(AsyncWebsocketConsumer):
         4. Creates/retrieves a chat session
         5. Sets up the WebSocket connection
         """
-        logger.info("[WebSocket] connect() called. Starting connection process.")
-        
-        # First, accept the connection to establish the WebSocket
+        # Only keep connection established log
         try:
             await self.accept()
             self.connection_accepted = True
             logger.info("[WebSocket] Connection accepted successfully.")
         except Exception as e:
             logger.error(f"[WebSocket] Failed to accept connection: {str(e)}", exc_info=True)
-            # If we can't accept, just close without sending error message
             try:
                 await self.close(code=4001, reason=f"Failed to accept connection: {str(e)}")
             except Exception as close_error:
                 logger.error(f"[WebSocket] Failed to close connection: {str(close_error)}")
             return
 
-        # Now handle the rest of the connection logic
         try:
-            # Rate limiting check
             client_ip = self.scope.get('client', ('0.0.0.0', 0))[0]
-            logger.info(f"[WebSocket] Client IP: {client_ip}")
             if not await self.check_rate_limit(client_ip):
                 logger.warning("[WebSocket] Rate limit exceeded for IP: %s", client_ip)
                 await self.close_with_error(4002, "Rate limit exceeded. Please try again later.")
                 return
 
-            # Get the token and auth_type from the query string
             query_string = self.scope['query_string'].decode()
-            logger.info(f"[WebSocket] Query string: {query_string}")
             token = None
             auth_type = None
             for param in query_string.split('&'):
@@ -81,8 +74,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     token = param.split('=')[1]
                 elif param.startswith('auth_type='):
                     auth_type = param.split('=')[1]
-            logger.info(f"[WebSocket] Token: {token}")
-            logger.info(f"[WebSocket] Auth type: {auth_type}")
 
             if not token or not auth_type:
                 logger.warning("[WebSocket] No token or auth_type provided.")
@@ -91,14 +82,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             user = None
             if auth_type == 'jwt':
-                logger.info("[WebSocket] JWT authentication attempted.")
                 user = await self.verify_jwt_token(token)
                 if not user:
                     logger.warning("[WebSocket] Invalid JWT token provided.")
                     await self.close_with_error(4001, "Invalid JWT token provided")
                     return
             elif auth_type == 'oauth2':
-                logger.info("[WebSocket] OAuth2 authentication attempted.")
                 user = await self.verify_oauth2_token(token)
                 if not user:
                     logger.warning("[WebSocket] Invalid OAuth2 token provided.")
@@ -109,24 +98,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 await self.close_with_error(4001, f"Invalid auth_type: {auth_type}")
                 return
 
-            # If authentication succeeded, set user and continue
             self.user = user
             self.last_token_refresh = django_timezone.now()
-            logger.info(f"[WebSocket] User {user.username} authenticated and connected to WebSocket.")
             self.is_connected = True
 
-            # Add the user to their personal channel group
             await self.channel_layer.group_add(
                 f"user_{self.user.id}",
                 self.channel_name
             )
-            logger.info(f"[WebSocket] Added user {self.user.username} to channel group user_{self.user.id}.")
 
-            # Create or get chat session
             self.chat_session = await self.get_or_create_chat_session()
-            logger.info(f"[WebSocket] Chat session {self.chat_session.id} created/retrieved for user {user.username}")
 
-            # Send user_info message to client (after all setup)
             try:
                 await self.send(text_data=json.dumps({
                     "type": "user_info",
@@ -137,9 +119,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         except Exception as e:
             logger.error(f"[WebSocket] Error in connect: {str(e)}", exc_info=True)
-            # Since connection is already accepted, we can safely send error message
             try:
-                # Send error message directly without using close_with_error
                 error_data = {
                     'type': 'error',
                     'code': 4001,
@@ -150,7 +130,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             except Exception as send_error:
                 logger.error(f"[WebSocket] Failed to send error message: {str(send_error)}")
             finally:
-                # Always close the connection
                 try:
                     await self.close(code=4001, reason=f"Connection error: {str(e)}")
                 except Exception as close_error:
@@ -286,18 +265,33 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.save_message(content, is_from_user=True)
             logger.info(f"Saved user message: {content[:50]}...")
             
-            # Send placeholder response instead of Flowise
-            placeholder_response = "This is a placeholder message from websocket. Flowise integration is currently disabled."
+            # Use Flowise to get a response
+            flowise_client = FlowiseClient()
+            try:
+                logger.info(f"About to call flowise_client.send_message: {content}")
+                session_id = str(self.chat_session.id) if self.chat_session else None
+                flowise_response = await flowise_client.send_message(content, session_id=session_id)
+                
+                logger.info(f"flowise_client.send_message returned: {flowise_response}")
+                if isinstance(flowise_response, dict) and "text" in flowise_response:
+                    response_content = flowise_response["text"]
+                    logger.info(f"if: response_content: {response_content}")
+                else:
+                    response_content = str(flowise_response)
+                    logger.info(f"else: response_content: {response_content}")
+            except Exception as e:
+                logger.error(f"Error calling Flowise: {str(e)}")
+                response_content = "Sorry, there was an error getting a response from the AI.Try again later."
             
-            # Save placeholder response to database
-            await self.save_message(placeholder_response, is_from_user=False)
-            logger.info("Saved placeholder response")
+            # Save Flowise response to database
+            await self.save_message(response_content, is_from_user=False)
+            logger.info(f"Saved Flowise response: {response_content}")
             
             # Send response back to user directly through WebSocket
             response_data = {
                 'type': 'message',
                 'id': str(uuid.uuid4()),
-                'content': placeholder_response,
+                'content': response_content,
                 'isUser': False,
                 'timestamp': datetime.now(timezone.utc).isoformat()
             }

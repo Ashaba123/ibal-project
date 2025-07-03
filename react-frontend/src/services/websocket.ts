@@ -48,7 +48,12 @@ export class WebSocketService {
         // Handle different message types
         switch (data.type) {
           case 'message':
-            this.messageHandlers.forEach(handler => handler(data));
+            // Map backend 'isUser' to frontend 'is_user_message' for consistency
+            const mappedMessage = {
+              ...data,
+              is_user_message: data.isUser !== undefined ? data.isUser : data.is_user_message
+            };
+            this.messageHandlers.forEach(handler => handler(mappedMessage));
             break;
           case 'loading':
             console.log('Loading state:', data.status);

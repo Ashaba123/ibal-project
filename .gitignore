@@ -232,6 +232,12 @@ flowise_data/*
 !flowise_data/.gitkeep
 
 # ===========================================
+# Ollama Data
+# ===========================================
+ollama_data/*
+!ollama_data/.gitkeep
+
+# ===========================================
 # Tutor Open edX
 # ===========================================
 tutor-openedx/*.egg-info/
