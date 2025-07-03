@@ -3,16 +3,10 @@ import { useWebSocket } from '../context/WebSocketContext';
 import { useAuth } from '../context/AuthContext';
 import './Chat.css';
 
-interface Message {
-  id: string;
-  content: string;
-  sender: string;
-  timestamp: string;
-}
 
 export const Chat = () => {
   const [message, setMessage] = useState('');
-  const { sendMessage, messages, isConnected, reconnect } = useWebSocket();
+  const { sendMessage, messages, isConnected } = useWebSocket();
   const { user, logout } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isSending, setIsSending] = useState(false);
@@ -72,13 +66,6 @@ export const Chat = () => {
     }
   }, [messages]);
 
-  const handleReconnect = () => {
-    console.log('[Chat] Manual reconnection requested', {
-      user: user?.username,
-      timestamp: new Date().toISOString()
-    });
-    reconnect();
-  };
 
   useEffect(() => {
     if (isWaitingForResponse) {

@@ -47,11 +47,9 @@ class AuthService {
   private loadingState = false;
   private loadingStateHandlers: ((loading: boolean) => void)[] = [];
   private accessToken: string | null = null;
-  private refreshToken: string | null = null;
 
   private constructor() {
     this.accessToken = localStorage.getItem('accessToken');
-    this.refreshToken = localStorage.getItem('refreshToken');
     // Initialize axios interceptor for token refresh
     axios.interceptors.response.use(
       (response) => response,
@@ -154,14 +152,12 @@ class AuthService {
 
   setTokens(access: string, refresh: string) {
     this.accessToken = access;
-    this.refreshToken = refresh;
     localStorage.setItem('accessToken', access);
     localStorage.setItem('refreshToken', refresh);
   }
 
   removeTokens() {
     this.accessToken = null;
-    this.refreshToken = null;
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
   }
@@ -200,7 +196,6 @@ class AuthService {
       localStorage.setItem('accessToken', access);
       localStorage.setItem('refreshToken', refresh);
       this.accessToken = access;
-      this.refreshToken = refresh;
 
       // Create a basic user object
       const user: User = {
@@ -304,34 +299,5 @@ class AuthService {
   }
 }
 
-// Helper function to decode JWT token
-const decodeToken = (token: string): any => {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
-      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-    return JSON.parse(jsonPayload);
-  } catch (error) {
-    console.error('[Auth] Error decoding token:', error);
-    return null;
-  }
-};
-
-// Helper function to extract user data from token
-const extractUserFromToken = (token: string): User | null => {
-  const decoded = decodeToken(token);
-  if (!decoded || !decoded.user_id) {
-    return null;
-  }
-  
-  return {
-    id: decoded.user_id,
-    username: decoded.username || 'User',
-    email: decoded.email || '',
-    is_superuser: decoded.is_superuser || false
-  };
-};
 
 export const authService = AuthService.getInstance(); 
