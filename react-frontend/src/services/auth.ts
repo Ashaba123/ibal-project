@@ -65,7 +65,7 @@ class AuthService {
           try {
             const refreshToken = localStorage.getItem('refreshToken');
             if (!refreshToken) {
-              throw new Error('No refresh token available');
+              throw new Error('User does not exist');
             }
 
             const response = await this.refreshAccessToken(refreshToken);
@@ -300,7 +300,7 @@ class AuthService {
   }
 
   getRefreshToken(): string | null {
-    return localStorage.getItem('refresh_token');
+    return localStorage.getItem('refreshToken');
   }
 }
 

@@ -58,11 +58,21 @@ function IbalXBlock(runtime, element) {
     isConnected = false;
   }
 
+  // Helper to show/hide loading bubble
+  function showLoadingBubble() {
+    $(element).find("#loading-bubble").show();
+  }
+  function hideLoadingBubble() {
+    $(element).find("#loading-bubble").hide();
+  }
+
   // Helper to add message to chat
   function addMessage(message, sender, isOwnMessage = false) {
     if (!message || typeof message !== "string" || message.trim() === "") {
       return; // Don't render empty messages
     }
+    // Hide loading bubble when a new message is received
+    hideLoadingBubble();
     const $messagesList = $(element).find("#messages-list");
     const messageClass = isOwnMessage ? "sent" : "received";
     const currentTime = new Date().toLocaleTimeString([], {
@@ -233,6 +243,8 @@ function IbalXBlock(runtime, element) {
       if (sendMessage(message)) {
         addMessage(message, currentUsername, true);
         $messageInput.val("");
+        // Show loading bubble after sending a message
+        showLoadingBubble();
       } else {
         updateStatus(
           "Failed to send message. Please check your connection.",

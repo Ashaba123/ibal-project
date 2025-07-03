@@ -42,11 +42,11 @@
 		header Upgrade websocket
 	}
 	handle @websocket {
-		reverse_proxy localhost:8001
+		reverse_proxy localhost:8000
 	}
 
 	# Main reverse proxy
-	reverse_proxy localhost:8001
+	reverse_proxy localhost:8000
 }
 
 # Flowise configuration

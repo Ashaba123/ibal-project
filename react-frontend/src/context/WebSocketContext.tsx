@@ -38,6 +38,13 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   const { user, isAuthenticated } = useAuth();
   const connectionAttempted = useRef(false);
   const processedMessageIds = useRef<Set<string>>(new Set());
+  const isAuthenticatedRef = useRef(isAuthenticated);
+  const userRef = useRef(user);
+
+  useEffect(() => {
+    isAuthenticatedRef.current = isAuthenticated;
+    userRef.current = user;
+  }, [isAuthenticated, user]);
 
   const connect = () => {
     const token = authService.getToken();
@@ -89,14 +96,23 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
       console.log('[WebSocket] Connection closed', {
         code: event.code,
         reason: event.reason,
-        user: user.username,
+        user: userRef.current?.username,
         timestamp: new Date().toISOString()
       });
       
-      // Only attempt to reconnect if we still have a valid token and are authenticated
-      if (authService.getToken() && isAuthenticated && user && !reconnectTimeout.current) {
+      // Only attempt to reconnect if we still have a valid token and are authenticated (using refs)
+      if (!isAuthenticatedRef.current || !userRef.current) {
+        console.log('[WebSocket] Not scheduling reconnection: user is not authenticated');
+        return;
+      }
+      if (authService.getToken() && !reconnectTimeout.current) {
         console.log('[WebSocket] Scheduling reconnection attempt');
         reconnectTimeout.current = setTimeout(() => {
+          if (!isAuthenticatedRef.current || !userRef.current) {
+            console.log('[WebSocket] Skipping reconnection: user is not authenticated');
+            reconnectTimeout.current = null;
+            return;
+          }
           console.log('[WebSocket] Attempting reconnection');
           reconnectTimeout.current = null;
           connect();

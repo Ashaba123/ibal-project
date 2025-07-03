@@ -57,10 +57,10 @@ export const authService = {
         email,
         password
       });
-      const { access, refresh, user } = response.data;
+      const { access, refresh, user, chat_session_id } = response.data;
       localStorage.setItem('token', access);
       localStorage.setItem('refreshToken', refresh);
-      return { token: access, refresh, user };
+      return { token: access, refresh, user, chatSessionId: chat_session_id };
     } catch (error) {
       console.error('Registration error:', error);
       throw error;

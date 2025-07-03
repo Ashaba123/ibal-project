@@ -24,7 +24,7 @@ const Login: React.FC = () => {
       navigate('/chat', { replace: true });
     } catch (err: any) {
       console.error('[Login] Login error:', err);
-      setError(err.message || 'Login failed');
+      setError('Invalid username or password.');
     } finally {
       setLoading(false);
     }

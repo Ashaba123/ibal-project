@@ -16,6 +16,7 @@ export const Chat = () => {
   const { user, logout } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isSending, setIsSending] = useState(false);
+  const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
 
   useEffect(() => {
     console.log('[Chat] Component mounted', {
@@ -47,10 +48,8 @@ export const Chat = () => {
 
     try {
       setIsSending(true);
-      console.log('[Chat] Sending message', {
-        message: message.trim(),
-        timestamp: new Date().toISOString()
-      });
+      setIsWaitingForResponse(true);
+      console.log('[Chat] Waiting bubble should display now');
       await sendMessage(message.trim());
       setMessage('');
     } catch (error) {
@@ -64,6 +63,15 @@ export const Chat = () => {
     }
   };
 
+  useEffect(() => {
+    if (messages.length === 0) return;
+    const lastMsg = messages[messages.length - 1];
+    if (!lastMsg.isUser) {
+      setIsWaitingForResponse(false);
+      console.log('[Chat] Waiting bubble should hide now');
+    }
+  }, [messages]);
+
   const handleReconnect = () => {
     console.log('[Chat] Manual reconnection requested', {
       user: user?.username,
@@ -71,6 +79,12 @@ export const Chat = () => {
     });
     reconnect();
   };
+
+  useEffect(() => {
+    if (isWaitingForResponse) {
+      console.log('[Chat] Rendering waiting bubble');
+    }
+  }, [isWaitingForResponse]);
 
   return (
     <div className="chat-container">
@@ -98,6 +112,17 @@ export const Chat = () => {
             </div>
           </div>
         ))}
+        {isWaitingForResponse && (
+          <div className="message bot-message waiting-bubble">
+            <div className="message-content">
+              <div className="loading-dots" aria-label="Loading" role="status" tabIndex={0}>
+                <span className="dot" />
+                <span className="dot" />
+                <span className="dot" />
+              </div>
+            </div>
+          </div>
+        )}
         <div ref={messagesEndRef} />
       </div>
 

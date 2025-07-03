@@ -4,4 +4,5 @@ export interface ChatMessage {
   timestamp?: string;
   status?: string;
   error?: string;
+  is_user_message?: boolean;
 } 
