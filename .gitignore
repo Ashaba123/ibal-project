@@ -224,7 +224,7 @@ react-frontend/playwright/.cache/
 xblock_development/var/
 xblock_development/*.egg-info/
 xblock_development/*/var/
-xblock_development/ibalxbloc/
+
 
 # ===========================================
 # Flowise Data
