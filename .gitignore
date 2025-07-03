@@ -224,6 +224,7 @@ react-frontend/playwright/.cache/
 xblock_development/var/
 xblock_development/*.egg-info/
 xblock_development/*/var/
+xblock_development/ibalxbloc/
 
 
 # ===========================================
@@ -249,7 +250,7 @@ ollama-data/models/manifests/registry.ollama.ai/library/tinyllama/latest
 # ===========================================
 # Tutor Open edX
 # ===========================================
-tutor-openedx/*
+tutor-openedx/
 tutor-openedx/*.egg-info/
 tutor-openedx/build/
 tutor-openedx/dist/
